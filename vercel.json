@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/send-magic-code",
+      "dest": "server.js",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/verify-magic-code",
+      "dest": "server.js",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/send-email",
+      "dest": "server.js",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/health",
+      "dest": "server.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ]
+}
+
+

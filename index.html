@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .total-section {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .total-section h2 {
+            color: #2e7d32;
+            font-size: 24px;
+        }
+
+        .total-section .amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1b5e20;
+            margin-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: white;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        footer p {
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #45a049;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #da190b;
+        }
+
+        .btn-send-email {
+            background: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .btn-send-email:hover {
+            background: #1976D2;
+        }
+
+        .btn-send-email:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .user-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-email {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #da190b;
+        }
+
+        .login-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+        }
+
+        .login-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .login-modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-modal input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .login-modal button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Vartotojo sekcija su prisijungimu -->
+        <div class="user-section" id="userSection" style="display: none;">
+            <div class="user-info">
+                <span style="font-size: 20px;">👤</span>
+                <span class="user-email" id="userEmailDisplay"></span>
+            </div>
+            <button class="btn-logout" onclick="logout()">Atsijungti</button>
+        </div>
+
+        <h1>📱 Subscription Tracker</h1>
+
+        <!-- Forma prenumeratos pridėjimui -->
+        <div class="form-section">
+            <h2>Pridėti prenumeratą</h2>
+            <div id="message"></div>
+            
+            <div class="form-group">
+                <label for="name">Prenumeratos pavadinimas:</label>
+                <input type="text" id="name" placeholder="pvz. Spotify, Netflix" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Kaina:</label>
+                <input type="number" id="price" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+                <label for="period">Atsiskaitymo periodas:</label>
+                <select id="period" required>
+                    <option value="monthly">Mėnesinis</option>
+                    <option value="yearly">Metinis</option>
+                </select>
+            </div>
+
+            <button id="addBtn" type="button">Pridėti prenumeratą</button>
+        </div>
+
+        <!-- Bendros mėnesio kainos rodymas -->
+        <div class="total-section">
+            <h2>Bendra mėnesio kaina</h2>
+            <div class="amount" id="totalAmount">€0.00</div>
+            <div style="margin-top: 15px;">
+                <input type="email" id="emailInput" placeholder="Jūsų el. paštas" style="padding: 8px; border: 2px solid #ddd; border-radius: 6px; width: 250px; margin-right: 10px;">
+                <button id="sendEmailBtn" class="btn-send-email" onclick="sendEmailReminder()">📧 Siųsti priminimą</button>
+            </div>
+        </div>
+
+        <!-- Lentelė su prenumeratomis -->
+        <div>
+            <h2>Mano prenumeratos</h2>
+            <div id="loading" class="loading">Kraunama...</div>
+            <table id="subscriptionsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Pavadinimas</th>
+                        <th>Kaina</th>
+                        <th>Periodas</th>
+                        <th>Mėnesio kaina</th>
+                        <th>Pridėta</th>
+                        <th>Veiksmai</th>
+                    </tr>
+                </thead>
+                <tbody id="subscriptionsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Redagavimo modalas -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Redaguoti prenumeratą</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="editName">Prenumeratos pavadinimas:</label>
+                    <input type="text" id="editName" placeholder="pvz. Spotify, Netflix" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPrice">Kaina:</label>
+                    <input type="number" id="editPrice" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPeriod">Atsiskaitymo periodas:</label>
+                    <select id="editPeriod" required>
+                        <option value="monthly">Mėnesinis</option>
+                        <option value="yearly">Metinis</option>
+                    </select>
+                </div>
+                <button type="button" onclick="saveEdit()" style="margin-top: 10px;">Išsaugoti pakeitimus</button>
+                <button type="button" onclick="closeEditModal()" style="margin-top: 10px; background: #ccc;">Atšaukti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prisijungimo modalas -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-modal-content">
+            <h2>🔐 Prisijungimas</h2>
+            <div id="loginMessage" style="margin-bottom: 15px;"></div>
+            
+            <!-- Žingsnis 1: El. pašto įvedimas -->
+            <div id="emailStep">
+                <div class="form-group">
+                    <label for="loginEmail">El. pašto adresas:</label>
+                    <input type="email" id="loginEmail" placeholder="jūsų@el-paštas.com" required>
+                </div>
+                <button type="button" onclick="sendMagicCode()">Siųsti Magic Code</button>
+            </div>
+
+            <!-- Žingsnis 2: Magic code patvirtinimas -->
+            <div id="codeStep" style="display: none;">
+                <div class="form-group">
+                    <label for="magicCode">Patvirtinimo kodas:</label>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Patikrinkite savo el. paštą - kodas 6 skaitmenų</p>
+                    <input type="text" id="magicCode" placeholder="000000" maxlength="6" required>
+                </div>
+                <button type="button" onclick="verifyMagicCode()">Patvirtinti kodą</button>
+                <button type="button" onclick="backToEmail()" style="background: #999; margin-top: 10px;">Grįžti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JavaScript biblioteka per CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Izoliuoti kodą, kad išvengtume konfliktų
+        (function() {
+        'use strict';
+        
+        // ============================================
+        // SUPABASE KONFIGŪRACIJA
+        // ============================================
+        const SUPABASE_URL = 'https://dofurbjeqymjblimxrwj.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_aRvwaIckjHw8VZli1EaEXQ_4HzEauHP';
+
+        // Supabase kliento inicializavimas
+        var supabase = null;
+        
+        // Inicializuoti Supabase kai biblioteka užsikrauna
+        function initSupabase() {
+            if (typeof window.supabase !== 'undefined') {
+                try {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    console.log('✓ Supabase inicializuotas');
+                    return true;
+                } catch (error) {
+                    console.error('✗ Supabase klaida:', error);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        // ============================================
+        // VARTOTOJO AUTENTIFIKAVIMAS
+        // ============================================
+
+        /**
+         * Siųsti magic code į el. paštą
+         */
+        async function sendMagicCode() {
+            const email = document.getElementById('loginEmail').value.trim();
+
+            // Validacija
+            if (!email || !email.includes('@')) {
+                showLoginMessage('Prašome įvesti teisingą el. pašto adresą.', 'error');
+                return;
+            }
+
+            const sendBtn = event.target;
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Siunčiama...';
+
+            try {
+                // Siųsti magic code per backend
+                const response = await fetch(window.location.origin + '/send-magic-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Klaida siunčiant kodą');
+                }
+
+                // Išsaugoti el. paštą ir rodetį kodą patvirtinimo žingsnį
+                sessionStorage.setItem('pendingEmail', email);
+                
+                // Jei yra test kodas (DEBUG režimas), rodyti jį
+                let msg = 'Kodas nusiųstas! Patikrinkite savo el. paštą.';
+                if (result.testCode) {
+                    msg += ` 🧪 Test kodas: ${result.testCode}`;
+                }
+                showLoginMessage(msg, 'success');
+
+                // Pereiti prie code žingsnio
+                setTimeout(() => {
+                    document.getElementById('emailStep').style.display = 'none';
+                    document.getElementById('codeStep').style.display = 'block';
+                    document.getElementById('magicCode').focus();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showLoginMessage('Klaida siunčiant kodą: ' + error.message, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Siųsti Magic Code';
+            }
+        }
+
+        /**
+         * Patvirtinti magic code
+         */
+        async function verifyMagicCode() {
+            const email = sessionStorage.getItem('pendingEmail');
+            const code = document.getElementById('magicCode').value.trim();
+            const verifyBtn = event.target;
+
+            if (!code || code.length !== 6) {
+                showLoginMessage('Prašome įvesti 6 skaitmenų kodą.', 'error');
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Patikrinimas...';
+
+            try {
+                // Patikrinti kodą per backend
+                const response = await fetch(window.location.origin + '/verify-magic-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Neteisingas kodas');
+                }
+
+                // Sėkmėjimas - išsaugoti el. paštą
+                localStorage.setItem('userEmail', email);
+                sessionStorage.removeItem('pendingEmail');
+                showLoginMessage('Sėkmingai prisijungta!', 'success');
+
+                // Uždaryti modalą
+                setTimeout(() => {
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('emailStep').style.display = 'block';
+                    document.getElementById('codeStep').style.display = 'none';
+                    document.getElementById('magicCode').value = '';
+                    document.getElementById('loginEmail').value = '';
+                    updateUserUI();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showLoginMessage('Klaida: ' + error.message, 'error');
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Patvirtinti kodą';
+            }
+        }
+
+        /**
+         * Grįžti prie el. pašto žingsnio
+         */
+        function backToEmail() {
+            document.getElementById('codeStep').style.display = 'none';
+            document.getElementById('emailStep').style.display = 'block';
+            document.getElementById('magicCode').value = '';
+            sessionStorage.removeItem('pendingEmail');
+            document.getElementById('loginEmail').focus();
+        }
+
+        /**
+         * Seninė login funkcija (nebėra naudojama, bet palikta kompatibilumui)
+         */
+        function login() {
+            sendMagicCode();
+        }
+
+        /**
+         * Atsijungti naudotojui
+         */
+        function logout() {
+            if (confirm('Ar tikrai norite atsijungti?')) {
+                localStorage.removeItem('userEmail');
+                updateUserUI();
+                // Atidaryti prisijungimo modalą
+                document.getElementById('loginModal').style.display = 'block';
+                document.getElementById('loginEmail').focus();
+            }
+        }
+
+        /**
+         * Atnaujinti vartotojo sąsają
+         */
+        function updateUserUI() {
+            const userEmail = localStorage.getItem('userEmail');
+            const userSection = document.getElementById('userSection');
+            const emailInput = document.getElementById('emailInput');
+
+            if (userEmail) {
+                // Rodytis prisijungusio vartotojo sekcija
+                userSection.style.display = 'flex';
+                document.getElementById('userEmailDisplay').textContent = userEmail;
+                // Automatiškai užpildyti el. pašto lauką
+                emailInput.value = userEmail;
+            } else {
+                // Paslėpti prisijungusio vartotojo sekcija
+                userSection.style.display = 'none';
+                emailInput.value = '';
+            }
+        }
+
+        /**
+         * Rodo prisijungimo modaloje esantį pranešimą
+         */
+        function showLoginMessage(text, type = 'error') {
+            const messageDiv = document.getElementById('loginMessage');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+        }
+
+        /**
+         * Patikrinti, ar vartotojas prisijungęs, ir jei ne, atidaryti prisijungimo modalą
+         */
+        function checkUserLogin() {
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (!userEmail) {
+                // Jei neprisijungęs, atidaryti loginą
+                document.getElementById('loginModal').style.display = 'block';
+                document.getElementById('loginEmail').focus();
+            } else {
+                // Jei prisijungęs, atnaujinti UI
+                updateUserUI();
+            }
+        }
+
+        /**
+         * Uždaryti prisijungimo modalą paspaudus ESC
+         */
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const loginModal = document.getElementById('loginModal');
+                // Nepaisyti Escape jei vartotojas nėra prisijungęs
+                if (loginModal.style.display === 'block' && localStorage.getItem('userEmail')) {
+                    loginModal.style.display = 'none';
+                }
+            }
+        });
+
+        /**
+         * Įjungti Enter klavišą prisijungimo formoje
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginEmail = document.getElementById('loginEmail');
+            if (loginEmail) {
+                loginEmail.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        login();
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // FUNKCIJOS
+        // ============================================
+
+        /**
+         * Rodo pranešimą vartotojui
+         */
+        function showMessage(text, type = 'error') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            
+            // Paslėpti pranešimą po 3 sekundžių
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        /**
+         * Apskaičiuoja mėnesio kainą pagal periodą
+         */
+        function getMonthlyPrice(price, period) {
+            if (period === 'yearly') {
+                return price / 12;
+            }
+            return price;
+        }
+
+        /**
+         * Formatuoja datą į skaitomą formatą
+         */
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('lt-LT');
+        }
+
+        /**
+         * Prideda naują prenumeratą į duomenų bazę
+         */
+        async function addSubscription() {
+            console.log('=== addSubscription funkcija iškviesta ===');
+            
+            // Patikrinti, ar Supabase klientas inicializuotas
+            if (!supabase) {
+                showMessage('Klaida: Supabase klientas neinicializuotas. Patikrinkite konsolę.');
+                console.error('Supabase klientas neinicializuotas');
+                return;
+            }
+            
+            const name = document.getElementById('name').value.trim();
+            const price = parseFloat(document.getElementById('price').value);
+            const period = document.getElementById('period').value;
+            const addBtn = document.getElementById('addBtn');
+            
+            console.log('Formos duomenys:', { name, price, period });
+
+            // Validacija
+            if (!name || !price || price <= 0) {
+                showMessage('Prašome užpildyti visus laukus teisingai.');
+                return;
+            }
+
+            // Išjungti mygtuką, kad išvengtume dubliavimo
+            addBtn.disabled = true;
+            addBtn.textContent = 'Išsaugoma...';
+
+            try {
+                console.log('Bandome įrašyti į Supabase...');
+                // Įrašyti į Supabase
+                const { data, error } = await supabase
+                    .from('subscriptions')
+                    .insert([
+                        {
+                            name: name,
+                            price: price,
+                            period: period
+                        }
+                    ])
+                    .select();
+
+                console.log('Supabase atsakas:', { data, error });
+
+                if (error) {
+                    console.error('Supabase klaida:', error);
+                    throw error;
+                }
+
+                // Sėkmės pranešimas
+                showMessage('Prenumerata sėkmingai pridėta!', 'success');
+
+                // Išvalyti formą
+                document.getElementById('name').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('period').value = 'monthly';
+
+                // Atnaujinti lentelę ir bendrą sumą
+                await loadSubscriptions();
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida išsaugant prenumeratą: ' + error.message);
+            } finally {
+                // Vėl įjungti mygtuką
+                addBtn.disabled = false;
+                addBtn.textContent = 'Pridėti prenumeratą';
+            }
+        }
+
+        /**
+         * Užkrauna visas prenumeratas iš duomenų bazės
+         */
+        async function loadSubscriptions() {
+            const loadingDiv = document.getElementById('loading');
+            const table = document.getElementById('subscriptionsTable');
+            const tbody = document.getElementById('subscriptionsBody');
+
+            try {
+                loadingDiv.style.display = 'block';
+                table.style.display = 'none';
+
+                // Gauti visas prenumeratas iš Supabase
+                const { data, error } = await supabase
+                    .from('subscriptions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Išvalyti lentelę
+                tbody.innerHTML = '';
+
+                // Apskaičiuoti bendrą mėnesio kainą
+                let totalMonthly = 0;
+
+                // Pridėti eilutes į lentelę
+                if (data && data.length > 0) {
+                    data.forEach(sub => {
+                        const monthlyPrice = getMonthlyPrice(sub.price, sub.period);
+                        totalMonthly += monthlyPrice;
+
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>${sub.name}</td>
+                            <td>€${sub.price.toFixed(2)}</td>
+                            <td>${sub.period === 'monthly' ? 'Mėnesinis' : 'Metinis'}</td>
+                            <td>€${monthlyPrice.toFixed(2)}</td>
+                            <td>${formatDate(sub.created_at)}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-edit" onclick="editSubscription(${sub.id})">Redaguoti</button>
+                                    <button class="btn-delete" onclick="deleteSubscription(${sub.id})">Trinti</button>
+                                </div>
+                            </td>
+                        `;
+                    });
+
+                    table.style.display = 'table';
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">Nėra išsaugotų prenumeratų</td></tr>';
+                    table.style.display = 'table';
+                }
+
+                // Atnaujinti bendrą sumą
+                document.getElementById('totalAmount').textContent = `€${totalMonthly.toFixed(2)}`;
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida užkraunant prenumeratas: ' + error.message);
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        /**
+         * Redaguoti prenumeratą
+         */
+        var currentEditId = null;
+
+        async function editSubscription(id) {
+            if (!supabase) {
+                showMessage('Klaida: Supabase klientas neinicializuotas.');
+                return;
+            }
+
+            try {
+                // Gauti prenumeratos duomenis
+                const { data, error } = await supabase
+                    .from('subscriptions')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                // Užpildyti formą
+                document.getElementById('editName').value = data.name;
+                document.getElementById('editPrice').value = data.price;
+                document.getElementById('editPeriod').value = data.period;
+                currentEditId = id;
+
+                // Atidaryti modalą
+                document.getElementById('editModal').style.display = 'block';
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida užkraunant prenumeratos duomenis: ' + error.message);
+            }
+        }
+
+        /**
+         * Uždaryti redagavimo modalą
+         */
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+            // Išvalyti formą
+            document.getElementById('editName').value = '';
+            document.getElementById('editPrice').value = '';
+            document.getElementById('editPeriod').value = 'monthly';
+        }
+
+        /**
+         * Išsaugoti redaguotą prenumeratą
+         */
+        async function saveEdit() {
+            if (!supabase || !currentEditId) {
+                showMessage('Klaida: Nepavyko identifikuoti prenumeratos.');
+                return;
+            }
+
+            const name = document.getElementById('editName').value.trim();
+            const price = parseFloat(document.getElementById('editPrice').value);
+            const period = document.getElementById('editPeriod').value;
+
+            // Validacija
+            if (!name || !price || price <= 0) {
+                showMessage('Prašome užpildyti visus laukus teisingai.');
+                return;
+            }
+
+            try {
+                // Atnaujinti duomenis Supabase
+                const { data, error } = await supabase
+                    .from('subscriptions')
+                    .update({
+                        name: name,
+                        price: price,
+                        period: period
+                    })
+                    .eq('id', currentEditId)
+                    .select();
+
+                if (error) {
+                    throw error;
+                }
+
+                // Sėkmės pranešimas
+                showMessage('Prenumerata sėkmingai atnaujinta!', 'success');
+
+                // Uždaryti modalą
+                closeEditModal();
+
+                // Atnaujinti lentelę
+                await loadSubscriptions();
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida atnaujinant prenumeratą: ' + error.message);
+            }
+        }
+
+        /**
+         * Trinti prenumeratą
+         */
+        async function deleteSubscription(id) {
+            if (!supabase) {
+                showMessage('Klaida: Supabase klientas neinicializuotas.');
+                return;
+            }
+
+            // Patvirtinimo dialogo langas
+            if (!confirm('Ar tikrai norite ištrinti šią prenumeratą?')) {
+                return;
+            }
+
+            try {
+                // Ištrinti iš Supabase
+                const { error } = await supabase
+                    .from('subscriptions')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    throw error;
+                }
+
+                // Sėkmės pranešimas
+                showMessage('Prenumerata sėkmingai ištrinta!', 'success');
+
+                // Atnaujinti lentelę
+                await loadSubscriptions();
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida trinant prenumeratą: ' + error.message);
+            }
+        }
+
+        // Uždaryti modalą paspaudus už jo ribų
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+
+        /**
+         * Siųsti el. laišką su prenumeratų priminimu
+         */
+        async function sendEmailReminder() {
+            const email = document.getElementById('emailInput').value.trim();
+            const sendBtn = document.getElementById('sendEmailBtn');
+
+            // Validacija
+            if (!email || !email.includes('@')) {
+                showMessage('Prašome įvesti teisingą el. pašto adresą.');
+                return;
+            }
+
+            if (!supabase) {
+                showMessage('Klaida: Supabase klientas neinicializuotas.');
+                return;
+            }
+
+            // Išjungti mygtuką
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Siunčiama...';
+
+            try {
+                // Gauti visas prenumeratas
+                const { data: subscriptions, error } = await supabase
+                    .from('subscriptions')
+                    .select('*');
+
+                if (error) {
+                    throw error;
+                }
+
+                // Apskaičiuoti bendrą sumą
+                let totalMonthly = 0;
+                if (subscriptions && subscriptions.length > 0) {
+                    subscriptions.forEach(sub => {
+                        const monthlyPrice = getMonthlyPrice(sub.price, sub.period);
+                        totalMonthly += monthlyPrice;
+                    });
+                }
+
+                // Siųsti užklausą į backend endpoint
+                // ⚠️ SVARBU: Pakeiskite šį URL į savo backend endpoint
+                // Jei naudojate lokalų serverį: 'http://localhost:3000/send-email'
+                // Jei naudojate produkcinį serverį: 'https://your-domain.com/send-email'
+                const BACKEND_URL = window.location.origin + '/send-email'; // Automatiškai naudoja esamą domeną
+
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        totalAmount: totalMonthly.toFixed(2),
+                        subscriptionCount: subscriptions ? subscriptions.length : 0,
+                        subscriptions: subscriptions || []
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Nepavyko išsiųsti el. laiško');
+                }
+
+                // Sėkmės pranešimas
+                showMessage('El. laiškas sėkmingai išsiųstas!', 'success');
+
+            } catch (error) {
+                console.error('Klaida:', error);
+                showMessage('Klaida siunčiant el. laišką: ' + error.message);
+            } finally {
+                // Vėl įjungti mygtuką
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📧 Siųsti priminimą';
+            }
+        }
+
+        // ============================================
+        // PAGRINDINIS KODAS
+        // ============================================
+        
+        // Kai puslapis užsikrauna
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Puslapis užkrautas');
+            
+            // Patikrinti vartotojo prisijungimą
+            checkUserLogin();
+            
+            // Bandyti inicializuoti Supabase
+            if (!initSupabase()) {
+                // Jei nepavyko, bandyti po 100ms
+                setTimeout(function() {
+                    if (!initSupabase()) {
+                        alert('Nepavyko užkrauti Supabase. Patikrinkite interneto ryšį.');
+                    }
+                }, 100);
+            }
+            
+            // Susieti mygtuką
+            var addBtn = document.getElementById('addBtn');
+            if (addBtn) {
+                addBtn.onclick = function() {
+                    console.log('Mygtukas paspaustas!');
+                    addSubscription();
+                };
+                console.log('Mygtukas susietas');
+            }
+            
+            // Užkrauti prenumeratas
+            setTimeout(function() {
+                if (supabase) {
+                    loadSubscriptions();
+                }
+            }, 500);
+        });
+        
+        // Padaryti funkcijas globalias
+        window.addSubscription = addSubscription;
+        window.editSubscription = editSubscription;
+        window.deleteSubscription = deleteSubscription;
+        window.closeEditModal = closeEditModal;
+        window.saveEdit = saveEdit;
+        window.sendEmailReminder = sendEmailReminder;
+        window.login = login;
+        window.logout = logout;
+        window.checkUserLogin = checkUserLogin;
+        window.updateUserUI = updateUserUI;
+        window.sendMagicCode = sendMagicCode;
+        window.verifyMagicCode = verifyMagicCode;
+        window.backToEmail = backToEmail;
+        window.showLoginMessage = showLoginMessage;
+        
+        })(); // Uždaryti IIFE
+    </script>
+    
+    <footer>
+        <p>Vardas Pavardė © <span id="currentYear"></span></p>
+    </footer>
+    
+    <script>
+        // Automatiškai nustatyti einamuosius metus
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
