@@ -770,12 +770,19 @@
                 return;
             }
             
+            // Gauti prisijungusio vartotojo el. paštą
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                showMessage('Prašome prisijungti pirmiausia.');
+                return;
+            }
+            
             const name = document.getElementById('name').value.trim();
             const price = parseFloat(document.getElementById('price').value);
             const period = document.getElementById('period').value;
             const addBtn = document.getElementById('addBtn');
             
-            console.log('Formos duomenys:', { name, price, period });
+            console.log('Formos duomenys:', { name, price, period, userEmail });
 
             // Validacija
             if (!name || !price || price <= 0) {
@@ -789,11 +796,12 @@
 
             try {
                 console.log('Bandome įrašyti į Supabase...');
-                // Įrašyti į Supabase
+                // Įrašyti į Supabase su user_email
                 const { data, error } = await supabase
                     .from('subscriptions')
                     .insert([
                         {
+                            user_email: userEmail,
                             name: name,
                             price: price,
                             period: period
@@ -841,10 +849,20 @@
                 loadingDiv.style.display = 'block';
                 table.style.display = 'none';
 
-                // Gauti visas prenumeratas iš Supabase
+                // Gauti prisijungusio vartotojo el. paštą
+                const userEmail = localStorage.getItem('userEmail');
+                if (!userEmail) {
+                    loadingDiv.style.display = 'none';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">Prašome prisijungti, kad matytumėte prenumeratas</td></tr>';
+                    table.style.display = 'table';
+                    return;
+                }
+
+                // Gauti tik prisijungusio vartotojo prenumeratas
                 const { data, error } = await supabase
                     .from('subscriptions')
                     .select('*')
+                    .eq('user_email', userEmail)
                     .order('created_at', { ascending: false });
 
                 if (error) {
@@ -907,12 +925,20 @@
                 return;
             }
 
+            // Gauti prisijungusio vartotojo el. paštą
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                showMessage('Prašome prisijungti pirmiausia.');
+                return;
+            }
+
             try {
-                // Gauti prenumeratos duomenis
+                // Gauti prenumeratos duomenis (tik savo)
                 const { data, error } = await supabase
                     .from('subscriptions')
                     .select('*')
                     .eq('id', id)
+                    .eq('user_email', userEmail)
                     .single();
 
                 if (error) {
@@ -955,6 +981,13 @@
                 return;
             }
 
+            // Gauti prisijungusio vartotojo el. paštą
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                showMessage('Prašome prisijungti pirmiausia.');
+                return;
+            }
+
             const name = document.getElementById('editName').value.trim();
             const price = parseFloat(document.getElementById('editPrice').value);
             const period = document.getElementById('editPeriod').value;
@@ -966,7 +999,7 @@
             }
 
             try {
-                // Atnaujinti duomenis Supabase
+                // Atnaujinti duomenis Supabase (tik savo prenumeratas)
                 const { data, error } = await supabase
                     .from('subscriptions')
                     .update({
@@ -975,6 +1008,7 @@
                         period: period
                     })
                     .eq('id', currentEditId)
+                    .eq('user_email', userEmail)
                     .select();
 
                 if (error) {
@@ -1005,17 +1039,25 @@
                 return;
             }
 
+            // Gauti prisijungusio vartotojo el. paštą
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                showMessage('Prašome prisijungti pirmiausia.');
+                return;
+            }
+
             // Patvirtinimo dialogo langas
             if (!confirm('Ar tikrai norite ištrinti šią prenumeratą?')) {
                 return;
             }
 
             try {
-                // Ištrinti iš Supabase
+                // Ištrinti iš Supabase (tik savo prenumeratas)
                 const { error } = await supabase
                     .from('subscriptions')
                     .delete()
-                    .eq('id', id);
+                    .eq('id', id)
+                    .eq('user_email', userEmail);
 
                 if (error) {
                     throw error;
