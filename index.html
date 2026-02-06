@@ -653,6 +653,7 @@
             const userEmail = localStorage.getItem('userEmail');
             const userSection = document.getElementById('userSection');
             const emailInput = document.getElementById('emailInput');
+            const addBtn = document.getElementById('addBtn');
 
             if (userEmail) {
                 // Rodytis prisijungusio vartotojo sekcija
@@ -660,10 +661,12 @@
                 document.getElementById('userEmailDisplay').textContent = userEmail;
                 // Automatiškai užpildyti el. pašto lauką
                 emailInput.value = userEmail;
+                if (addBtn) addBtn.disabled = false;
             } else {
                 // Paslėpti prisijungusio vartotojo sekcija
                 userSection.style.display = 'none';
                 emailInput.value = '';
+                if (addBtn) addBtn.disabled = true;
             }
         }
 
@@ -771,9 +774,11 @@
             }
             
             // Gauti prisijungusio vartotojo el. paštą
-            const userEmail = localStorage.getItem('userEmail');
+            const userEmail = (localStorage.getItem('userEmail') || '').trim();
             if (!userEmail) {
                 showMessage('Prašome prisijungti pirmiausia.');
+                document.getElementById('loginModal').style.display = 'block';
+                document.getElementById('loginEmail').focus();
                 return;
             }
             
